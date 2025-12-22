@@ -1,4 +1,4 @@
-# databricks Cap project 
+# databricks Capstone project 
 
 
 ![](ProjectViz.gif)
