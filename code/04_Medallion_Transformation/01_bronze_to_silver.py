@@ -10,7 +10,7 @@ silver_schema = "02_silver"
 # --- CLEAN TELEMATICS ---
 @dlt.table(
     name=f"{catalog}.{silver_schema}.telematics",
-    comment="cleaned telematics events",
+    comment="cleaned telematics event",
     table_properties={
         "quality": "silver"
     }
