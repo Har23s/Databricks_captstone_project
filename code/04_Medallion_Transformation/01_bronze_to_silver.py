@@ -109,7 +109,7 @@ def training_images():
 # --- CLEAN CLAIM IMAGES ---
 @dlt.table(
     name=f"{catalog}.{silver_schema}.claim_images",
-    comment="Enriched claim images",
+    comment="Enriched claim image",
     table_properties={
         "quality": "silver"
     }
