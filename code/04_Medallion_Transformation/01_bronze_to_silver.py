@@ -94,7 +94,7 @@ def customer():
 # --- CLEAN TRAINING IMAGES ---
 @dlt.table(
     name=f"{catalog}.{silver_schema}.training_images",
-    comment="Enriched accident training images",
+    comment="Enriched accident training image",
     table_properties={
         "quality": "silver"
     }
