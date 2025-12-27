@@ -5,7 +5,7 @@ from pyspark.sql.types import MapType, StringType
 kinesis_config = {
     "streamName": "<telematics-stream-name>",
     "region": "<region>",
-    "serviceCredential": "<kinesis-service-credential-name>",
+    "serviceCredential": "<kinesis-service-credential-nam>",
     "initialPosition": "earlierst"
 }
 
