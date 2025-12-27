@@ -13,7 +13,7 @@ payload_schema = MapType(StringType(), StringType())
 
 @dlt.table(
     name="telematics",
-    comment="Parsed Kinesis data as map with metadata struct",
+    comment="Parsed Kinesis data as map with metadata ",
     table_properties={"quality": "bronze"}
 )
 def bronze_table():
