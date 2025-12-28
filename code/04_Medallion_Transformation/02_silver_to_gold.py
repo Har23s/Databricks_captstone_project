@@ -10,7 +10,7 @@ gold_schema = '03_gold'
 
 def geocode(geolocator, address):
     try:
-        #Skip the API call for faster demo (remove this line for ream)
+        #Skip the API call for faster demo (remove this line for rea)
         return pd.Series({'latitude':  random.uniform(-90, 90), 'longitude': random.uniform(-180, 180)})
         location = geolocator.geocode(address)
         if location:
