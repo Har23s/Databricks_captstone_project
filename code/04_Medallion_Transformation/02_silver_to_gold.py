@@ -63,7 +63,7 @@ def customer_claim_policy():
     claim_policy = claim.join(policy, "policy_no")
     return claim_policy.join(customer, claim_policy.cust_id == customer.customer_id)
 
-# --- CLAIM-POLICY-TELEMATICSs ---
+# --- CLAIM-POLICY-TELEMATICS ---
 @dlt.table(
     name=f"{catalog}.{gold_schema}.customer_claim_policy_telematics",
     comment="claims with geolocation latitude/longitude",
