@@ -2,7 +2,7 @@ from pyspark.sql.functions import (
     col, to_date, date_format, trim, initcap,
     split, size, when, concat, lit, abs, to_timestamp, regexp_extract
 )
-import dlt #delta live 
+import dlt #delta live tables 
 
 # Configuration of the schema 
 catalog = "insurance_claim_project"
