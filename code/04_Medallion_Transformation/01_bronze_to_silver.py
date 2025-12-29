@@ -4,7 +4,7 @@ from pyspark.sql.functions import (
 )
 import dlt
 
-# Configuration
+# Configuration of the schema 
 catalog = "insurance_claim_project"
 bronze_schema = "bronze"
 silver_schema = "silver"
