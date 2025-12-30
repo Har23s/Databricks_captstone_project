@@ -15,7 +15,7 @@ catalog = "insurance_claim_project"
 silver_schema = "silver"
 gold_schema = "gold"
 
-# --- 2. AGGREGATED TELEMATICS (GOLD) ---
+#  2. AGGREGATED TELEMATICS (GOLD)
 @dlt.table(
     # FIX: Added catalog and gold_schema to the table name
     name=f"{catalog}.{gold_schema}.gold_aggregated_telematics",
