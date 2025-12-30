@@ -1,40 +1,28 @@
-import geopy
+import dlt
+import geopy  
 import pandas as pd
-from pyspark.sql.functions import col, lit, concat, pandas_udf, avg
+from pyspark.sql.functions import col, avg
 from typing import Iterator
 import random
 
-catalog = 'smart_claims_dev'
-silver_schema = '02_silver'
-gold_schema = '03_gold'
+try:
+    from transformations.utilities.libraries import get_lat_long
+except ImportError:
+    from utilities.libraries import get_lat_long
 
-def geocode(geolocator, address):
-    try:
-        #Skip the API call for faster demo (remove this line for ream)
-        return pd.Series({'latitude':  random.uniform(-90, 90), 'longitude': random.uniform(-180, 180)})
-        location = geolocator.geocode(address)
-        if location:
-            return pd.Series({'latitude': location.latitude, 'longitude': location.longitude})
-    except Exception as e:
-        print(f"error getting lat/long: {e}")
-    return pd.Series({'latitude': None, 'longitude': None})
-      
-@pandas_udf("latitude float, longitude float")
-def get_lat_long(batch_iter: Iterator[pd.Series]) -> Iterator[pd.DataFrame]:
-  #ctx = ssl.create_default_context(cafile=certifi.where())
-  #geopy.geocoders.options.default_ssl_context = ctx
-  geolocator = geopy.Nominatim(user_agent="claim_lat_long", timeout=5, scheme='https')
-  for address in batch_iter:
-    yield address.apply(lambda x: geocode(geolocator, x))
+# Configuration
+catalog = "insurance_claim_project"
+silver_schema = "silver"
+gold_schema = "gold"
 
+# --- 2. AGGREGATED TELEMATICS (GOLD) ---
 @dlt.table(
-    name=f"{catalog}.{gold_schema}.aggregated_telematics",
-    comment="Average telematics",
-    table_properties={
-        "quality": "gold"
-    }
+    # FIX: Added catalog and gold_schema to the table name
+    name=f"{catalog}.{gold_schema}.gold_aggregated_telematics",
+    comment="Average telematics data per vehicle",
+    table_properties={"quality": "gold"}
 )
-def telematics():
+def gold_aggregated_telematics():
     return (
         dlt.read(f"{catalog}.{silver_schema}.telematics")
         .groupBy("chassis_no")
@@ -45,39 +33,43 @@ def telematics():
         )
     )
 
-# --- CLAIM-POLICY ---
+# --- 3. CUSTOMER CLAIM POLICY (GOLD) ---
 @dlt.table(
+    # FIX: Added catalog and gold_schema to the table name
     name=f"{catalog}.{gold_schema}.customer_claim_policy",
-    comment = "Curated claim joined with policy records",
-    table_properties={
-        "quality": "gold"
-    }
+    comment="Joined table of claims, policies, and customers",
+    table_properties={"quality": "gold"}
 )
-def customer_claim_policy():
-    # Read the cleaned policy records
-    policy = dlt.readStream(f"{catalog}.{silver_schema}.policy")
-    # Read the cleaned claim records
-    claim = dlt.readStream(f"{catalog}.{silver_schema}.claim")
-    # Read the cleaned customer records
-    customer = dlt.readStream(f"{catalog}.{silver_schema}.customer") 
+def gold_customer_claim_policy():
+    policy = dlt.read(f"{catalog}.{silver_schema}.policy")
+    claim = dlt.read(f"{catalog}.{silver_schema}.claim")
+    customer = dlt.read(f"{catalog}.{silver_schema}.customer") 
+
     claim_policy = claim.join(policy, "policy_no")
-    return claim_policy.join(customer, claim_policy.cust_id == customer.customer_id)
+    return claim_policy.join(customer, claim_policy.CUST_ID == customer.customer_id)
 
-# --- CLAIM-POLICY-TELEMATICS ---
+# --- 4. FINAL ENRICHED TABLE (GOLD) ---
 @dlt.table(
+    # FIX: Added catalog and gold_schema to the table name
     name=f"{catalog}.{gold_schema}.customer_claim_policy_telematics",
-    comment="claims with geolocation latitude/longitude",
-        table_properties={
-        "quality": "gold"
-    }
+    comment="Final enriched dataset with geocoding and telematics",
+    table_properties={"quality": "gold"}
 )
-def customer_claim_policy_telematics():
-  telematics = dlt.read(f"{catalog}.{gold_schema}.aggregated_telematics")
-  customer_claim_policy = dlt.read(f"{catalog}.{gold_schema}.customer_claim_policy").where("BOROUGH is not null")
-  return (customer_claim_policy
-            .withColumn("lat_long", get_lat_long(col("address")))
-            .join(telematics, on="chassis_no")
-        )
-  
-
-
+def gold_final_enriched_table():
+    # Use the fully qualified name to read the gold table defined above
+    telematics_df = (
+        dlt.read(f"{catalog}.{gold_schema}.gold_aggregated_telematics")
+        .withColumnRenamed("chassis_no", "CHASSIS_NO")
+    )
+    
+    # Use the fully qualified name to read the gold table defined above
+    main_df = dlt.read(f"{catalog}.{gold_schema}.customer_claim_policy").where("address IS NOT NULL")
+    
+    return (
+        main_df
+        .withColumn("lat_long", get_lat_long(col("address")))
+        .withColumn("latitude", col("lat_long.latitude"))
+        .withColumn("longitude", col("lat_long.longitude"))
+        .join(telematics_df, "CHASSIS_NO", how="left")
+        .drop("lat_long")
+    )
