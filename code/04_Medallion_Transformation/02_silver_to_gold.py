@@ -56,7 +56,7 @@ def gold_customer_claim_policy():
     table_properties={"quality": "gold"}
 )
 def gold_final_enriched_table():
-    # Use the fully qualified name to read the gold table defined above
+    
     telematics_df = (
         dlt.read(f"{catalog}.{gold_schema}.gold_aggregated_telematics")
         .withColumnRenamed("chassis_no", "CHASSIS_NO")
