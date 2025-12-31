@@ -1,4 +1,4 @@
-# databricks Capstone project 
+# databricks Insurance claims Capstone project 
 
 
 ![](ProjectViz.gif)
