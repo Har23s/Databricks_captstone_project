@@ -4,7 +4,7 @@ from pyspark.sql.functions import (
 )
 import dlt #delta live tables 
 
-# Configuration of the schema 
+# Configuration of  schema 
 catalog = "insurance_claim_project"
 bronze_schema = "bronze"
 silver_schema = "silver"
