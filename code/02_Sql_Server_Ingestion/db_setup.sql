@@ -86,4 +86,4 @@ EXEC sys.sp_cdc_enable_table
 @supports_net_changes = 1
 
 -- 4. Set up DDL capture and schema evolution -
---> Run Script -> ddl_support_objects.sql which you can find here: https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/sql-server-cdc <--
+--> Run this Script -> ddl_support_objects.sql which you can find here: https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/sql-server-cdc <--
